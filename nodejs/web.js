@@ -1,13 +1,24 @@
-var express = require("express");
-var app = express();
-var server = require('http').createServer(app)
-app.use(express.logger());
+var express = require('express');
 
-app.get('/', function(request, response) {
-  response.send('Hello World!');
+var io = require('socket.io')
+
+io.configure(function () { 
+  io.set("transports", ["xhr-polling"]); 
+  io.set("polling duration", 10); 
 });
 
-var port = process.env.PORT || 5000;
-app.listen(port, function() {
-  console.log("Listening on " + port);
+var app = express();
+var server = require('http').createServer(app)
+
+app.use(express.static(__dirname + '/public'));
+
+server.listen(process.env.PORT || 5000);
+var serv_io = io.listen(server);
+
+var map=[];
+serv_io.sockets.on('connection', function (socket) {
+  socket.emit('news', { hello: 'world' });
+  socket.on('my other event', function (data) {
+    console.log(data);
+  });
 });
